@@ -1,5 +1,6 @@
 [build]
 target = "xtensa-esp32-espidf"
+rustflags = "--cfg espidf_time64"
 
 [target.xtensa-esp32-espidf]
 linker = "ldproxy"
@@ -12,5 +13,5 @@ build-std = ["std", "panic_abort"]
 
 [env]
 # Note: these variables are not used when using pio builder (`cargo build --features pio`)
-ESP_IDF_VERSION = "release/v4.4"
+ESP_IDF_VERSION = "release/v5.0"
 

@@ -1,0 +1,5 @@
+#include "hal/i2s_hal.h"
+#include "hal/i2s_ll.h"
+#include "hal/gpio_ll.h"
+#include "soc/lcd_periph.h"
+#include "esp_intr_alloc.h"
