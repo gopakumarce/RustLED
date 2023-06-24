@@ -1,0 +1,14 @@
+[package]
+name = "rustled-platforms-stub"
+version = "0.1.0"
+authors = ["Gopa Kumar <gopakumarce@gmail.com>"]
+edition = "2021"
+resolver = "2"
+keywords = ["embedded", "led", "graphics"]
+description = "Library to display text and images on Neopixel/WS2812 style of LEDs"
+repository = "https://github.com/gopakumarce/RustLED"
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
+anyhow = {version = "1", features = ["backtrace"]}
