@@ -1,3 +1,6 @@
+#include "freertos/semphr.h"
+#include "freertos/queue.h"
+#include "freertos/portmacro.h"
 #include "hal/i2s_hal.h"
 #include "hal/i2s_ll.h"
 #include "hal/gpio_ll.h"

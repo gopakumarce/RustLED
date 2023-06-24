@@ -1,0 +1,35 @@
+[package]
+name = "rustled-platforms-esp"
+version = "0.1.0"
+authors = ["Gopa Kumar <gopakumarce@gmail.com>"]
+edition = "2021"
+resolver = "2"
+keywords = ["embedded", "led", "graphics", "esp", "esp32"]
+description = "Library to display text and images on Neopixel/WS2812 style of LEDs"
+repository = "https://github.com/gopakumarce/RustLED"
+license = "MIT"
+readme = "README.md"
+
+[[package.metadata.esp-idf-sys.extra_components]]
+bindings_header = "bindings.h"
+
+[dependencies]
+cfg-if = "1.0"
+anyhow = {version = "1", features = ["backtrace"]}
+log = "0.4"
+rustled-platforms-common = { path = "../common" }
+rustled-common = { path = "../../common" }
+critical-section = "1.1.1"
+
+[target.'cfg(target_arch = "xtensa")'.dependencies]
+esp-idf-sys = { git = "https://github.com/gopakumarce/esp-idf-sys.git", branch = "gopa-v0.33.7", features = ["binstart"] }
+esp-idf-svc = { git = "https://github.com/gopakumarce/esp-idf-svc.git", branch = "gopa-v0.47.3" }
+esp-idf-hal = { git = "https://github.com/gopakumarce/esp-idf-hal.git", branch = "gopa-v0.42.5", features = ["critical-section"] }
+embedded-svc = "0.25"
+embedded-hal = "0.2.7"
+
+[build-dependencies]
+embuild = { git = "https://github.com/gopakumarce/embuild.git", branch = "gopa-inline_fns", features = ["elf"] }
+anyhow = "1"
+
+
