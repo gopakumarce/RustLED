@@ -1,0 +1,31 @@
+[package]
+name = "rustled-sample-main"
+version = "0.1.0"
+authors = ["Gopa Kumar <gopakumarce@gmail.com>"]
+edition = "2021"
+resolver = "2"
+keywords = ["embedded", "led", "graphics"]
+description = "Library to display text and images on Neopixel/WS2812 style of LEDs"
+repository = "https://github.com/gopakumarce/RustLED"
+license = "MIT"
+readme = "README.md"
+
+[[package.metadata.esp-idf-sys.extra_components]]
+bindings_header = "bindings.h"
+
+[dependencies]
+cfg-if = "1.0"
+anyhow = "1"
+
+[target.'cfg(target_arch = "xtensa")'.dependencies]
+esp-idf-sys = { git = "https://github.com/gopakumarce/esp-idf-sys.git", branch = "gopa-v0.33.7", features = ["binstart"] } 
+rustled-platforms-esp = { path = "../platforms/esp" }
+rustled-common = { path = "../common" }
+log = "0.4"
+
+[target.'cfg(not(target_arch = "xtensa"))'.dependencies]
+rustled-platforms-stub = { path = "../platforms/stub" }
+
+[build-dependencies]
+embuild = { git = "https://github.com/gopakumarce/embuild.git", branch = "gopa-inline_fns", features = ["elf"] }
+anyhow = "1"

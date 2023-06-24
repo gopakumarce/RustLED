@@ -1,14 +1,13 @@
-[package]
-name = "rust-led"
-version = "0.1.0"
-authors = ["Gopa Kumar <gopakumarce@gmail.com>"]
-edition = "2021"
+[workspace]
+members = [
+  "platforms/esp",
+  "platforms/stub",
+  "platforms/common",
+  "common",
+  "sample_main"
+]
+
 resolver = "2"
-keywords = ["embedded", "led", "graphics", "esp32", "arduino", "raspberry-pi"]
-description = "Library to display text and images on Neopixel/WS2812 style of LEDs"
-repository = "https://github.com/gopakumarce/RustLED"
-license = "MIT"
-readme = "README.md"
 
 [profile.release]
 opt-level = "s"
@@ -16,25 +15,3 @@ opt-level = "s"
 [profile.dev]
 debug = true    # Symbols are nice and they don't increase the size on Flash
 opt-level = "z"
-
-[patch.crates-io]
-esp-idf-sys = { git = "https://github.com/gopakumarce/esp-idf-sys.git", branch = "gopa-v0.33.0" }
-
-[[package.metadata.esp-idf-sys.extra_components]]
-#component_dirs = ["esp_hw_support"]
-bindings_header = "bindings.h"
-
-[dependencies]
-anyhow = {version = "1", features = ["backtrace"]}
-log = "0.4"
-esp-idf-sys = { version = "0.33.0", features = ["binstart"] }
-esp-idf-svc = "0.46.0"
-esp-idf-hal = "0.41.0"
-embedded-svc = "0.25"
-embedded-hal = "0.2.7"
-
-[build-dependencies]
-embuild = { git = "https://github.com/gopakumarce/embuild.git", branch = "gopa-inline_fns", features = ["elf"] }
-anyhow = "1"
-
-
