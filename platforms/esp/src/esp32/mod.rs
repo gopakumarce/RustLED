@@ -1,13 +1,8 @@
 use anyhow::Result;
 use log::error;
 
-use crate::common::{add_i2s_pin, start_mqtt, start_wifi, LedI2s, LedI2sPlatform};
-use esp_idf_hal::prelude::Peripherals;
-use esp_idf_svc::eventloop::EspSystemEventLoop;
-use esp_idf_sys::{
-    i2s_hal_context_t, i2s_hal_init, lcd_periph_signals, periph_module_enable,
-    I2S_OUT_EOF_INT_ENA_S, I2S_OUT_EOF_INT_ENA_V,
-};
+use crate::common::{add_i2s_pin, LedI2s, LedI2sPlatform};
+use esp_idf_sys::{i2s_hal_context_t, i2s_hal_init, lcd_periph_signals, periph_module_enable};
 
 use rustled_platforms_common::LedSpec;
 
@@ -95,14 +90,6 @@ pub fn platform_init(pins: &[u32]) -> Result<()> {
     esp_idf_sys::link_patches();
     println!("Hello from Rust!");
     esp_idf_svc::log::EspLogger::initialize_default();
-    let peripherals = Peripherals::take().unwrap();
-    let sysloop = EspSystemEventLoop::take()?;
-    if let Err(error) = start_wifi(peripherals.modem, sysloop) {
-        error!("Wifi Error {error}");
-    }
-    if let Err(error) = start_mqtt() {
-        error!("Mqtt Error {error}")
-    }
     unsafe {
         if let Err(error) = configure_i2s(0) {
             error!("I2S config error {error}");

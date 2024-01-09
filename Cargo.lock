@@ -606,7 +606,7 @@ dependencies = [
 [[package]]
 name = "esp-idf-hal"
 version = "0.42.5"
-source = "git+https://github.com/gopakumarce/esp-idf-hal.git?branch=gopa-v0.42.5#32cfff0f9a1161379fa60dfe4fbace18ff8416b4"
+source = "git+https://github.com/gopakumarce/esp-idf-hal.git?branch=gopa-v0.42.5#bf82fddbe15fb10e3bb8300299024a7f19c51264"
 dependencies = [
  "atomic-waker",
  "critical-section",
@@ -628,7 +628,7 @@ dependencies = [
 [[package]]
 name = "esp-idf-svc"
 version = "0.47.3"
-source = "git+https://github.com/gopakumarce/esp-idf-svc.git?branch=gopa-v0.47.3#c92deac1e8991a47d47e6b0d1e58ef990e70026b"
+source = "git+https://github.com/gopakumarce/esp-idf-svc.git?branch=gopa-v0.47.3#5f3b3fe2f497dfba3bfdec6af797ad9ba87b401a"
 dependencies = [
  "embassy-futures",
  "embedded-svc 0.26.4",
@@ -644,7 +644,7 @@ dependencies = [
 [[package]]
 name = "esp-idf-sys"
 version = "0.33.7"
-source = "git+https://github.com/gopakumarce/esp-idf-sys.git?branch=gopa-v0.33.7#b70d34787e6563f5f5bcb6c43db3f393814a2796"
+source = "git+https://github.com/gopakumarce/esp-idf-sys.git?branch=gopa-v0.33.7#1ca1c9aacdc656d4972f1d72f9747dd5dc92e855"
 dependencies = [
  "anyhow",
  "bindgen",
