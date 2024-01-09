@@ -6,3 +6,4 @@
 #include "hal/gpio_ll.h"
 #include "soc/lcd_periph.h"
 #include "esp_intr_alloc.h"
+#include "esp_rom_gpio.h"

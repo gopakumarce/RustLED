@@ -1,6 +1,4 @@
-use std::time::Duration;
 mod platform_libs;
-use log::info;
 use rustled_common::NUM_COLORS;
 
 fn main() -> anyhow::Result<()> {

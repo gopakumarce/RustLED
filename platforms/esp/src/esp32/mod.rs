@@ -4,7 +4,7 @@ use log::error;
 use crate::common::{add_i2s_pin, LedI2s, LedI2sPlatform};
 use esp_idf_hal::delay::FreeRtos;
 use esp_idf_sys::{
-    i2s_hal_context_t, i2s_hal_init, i2s_ll_gopa_init, lcd_periph_signals, periph_module_enable,
+    i2s_hal_context_t, i2s_hal_init, lcd_periph_signals, periph_module_enable,
     xTaskCreatePinnedToCore,
 };
 use std::ffi::CString;
@@ -38,8 +38,6 @@ unsafe fn configure_i2s(device: u32) -> std::result::Result<(), &'static str> {
     periph_module_enable(lcd_periph_signals.buses[device as usize].module);
     let mut hal: i2s_hal_context_t = Default::default();
     i2s_hal_init(&mut hal, device as i32);
-    i2s_ll_gopa_init(hal.dev);
-
     /*
         (*hal.dev).conf.__bindgen_anon_1.set_tx_msb_right(1);
         (*hal.dev).conf.__bindgen_anon_1.set_tx_mono(0);
@@ -83,7 +81,6 @@ unsafe fn configure_i2s(device: u32) -> std::result::Result<(), &'static str> {
         (*hal.dev).conf_chan.__bindgen_anon_1.set_tx_chan_mod(1);
         (*hal.dev).timing.val = 0;
     */
-
     // WS2812 spec copied from src/chipsets.h WS2812Controller800Khz in FastLED codebase
     let spec = LedSpec {
         t1_ns: 250,
@@ -125,8 +122,6 @@ pub fn platform_init(_pins: &[u32]) -> Result<()> {
         println!("Delay from main");
         FreeRtos::delay_ms(5000);
     }
-
-    Ok(())
 }
 
 unsafe extern "C" fn core1_task(_: *mut core::ffi::c_void) {
