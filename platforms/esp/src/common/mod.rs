@@ -96,6 +96,8 @@ impl LedI2s {
         // Just so that a new platform doesnt cause surprises
         assert!(num_channels <= MAX_CHANNEL_BYTES);
 
+        println!("GOPA 1");
+
         let mut i2s = Self {
             hal,
             device,
@@ -113,13 +115,19 @@ impl LedI2s {
         };
         i2s.reset();
 
+        println!("GOPA reset");
+
         let data_pin = 4;
         let i2s_pin = lcd_periph_signals.buses[device as usize].data_sigs[0] as u32;
         gpio_ll_iomux_func_sel(GPIO_PIN_MUX_REG[data_pin as usize], PIN_FUNC_GPIO);
         gpio_set_direction(data_pin as i32, GPIO_MODE_DEF_OUTPUT);
         esp_rom_gpio_connect_out_signal(data_pin, i2s_pin, false, false);
 
+        println!("GOPA start");
+
         i2s.start();
+
+        println!("GOPA started");
 
         Ok(())
     }
@@ -180,7 +188,8 @@ impl LedI2s {
         self.next_descriptor = 0;
         self.reset();
         self.platform.i2s_ll_burst_en(self.hal);
-        i2s_ll_set_out_link_addr(self.hal.dev, self.descriptors[0].descriptor as u32);
+        //i2s_ll_set_out_link_addr(self.hal.dev, self.descriptors[0].descriptor as u32);
+        i2s_ll_set_out_link_addr(self.hal.dev, !0 as u32);
         i2s_ll_start_out_link(self.hal.dev);
         //i2s_ll_clear_intr_status(self.hal.dev, I2S_LL_EVENT_TX_EOF);
         self.platform.i2s_ll_set_out_dscr(self.hal);
@@ -234,7 +243,7 @@ pub unsafe fn configure_clocks(hal: &mut i2s_hal_context_t, spec: &LedSpec) -> C
         bclk: mclk as u32,
         bclk_div: 1,
     };
-    i2s_hal_set_tx_clock(hal, &cfg, soc_periph_i2s_clk_src_t_I2S_CLK_SRC_DEFAULT);
+    //i2s_hal_set_tx_clock(hal, &cfg, soc_periph_i2s_clk_src_t_I2S_CLK_SRC_DEFAULT);
 
     result
 }
