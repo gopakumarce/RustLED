@@ -7,7 +7,7 @@ use rustled_common::NUM_COLORS;
 pub fn blink_leds() {
     loop {
         info!("Sleeping..");
-        thread::sleep(Duration::from_secs(1));
+        thread::sleep(Duration::from_secs(10000));
     }
 }
 
