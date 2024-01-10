@@ -38,49 +38,49 @@ unsafe fn configure_i2s(device: u32) -> std::result::Result<(), &'static str> {
     periph_module_enable(lcd_periph_signals.buses[device as usize].module);
     let mut hal: i2s_hal_context_t = Default::default();
     i2s_hal_init(&mut hal, device as i32);
-    /*
-        (*hal.dev).conf.__bindgen_anon_1.set_tx_msb_right(1);
-        (*hal.dev).conf.__bindgen_anon_1.set_tx_mono(0);
-        (*hal.dev).conf.__bindgen_anon_1.set_tx_short_sync(0);
-        (*hal.dev).conf.__bindgen_anon_1.set_tx_msb_shift(0);
-        (*hal.dev).conf.__bindgen_anon_1.set_tx_right_first(1);
-        (*hal.dev).conf.__bindgen_anon_1.set_tx_slave_mod(0);
 
-        (*hal.dev).conf2.val = 0;
-        (*hal.dev).conf2.__bindgen_anon_1.set_lcd_en(1);
-        (*hal.dev).conf2.__bindgen_anon_1.set_lcd_tx_wrx2_en(0);
-        (*hal.dev).conf2.__bindgen_anon_1.set_lcd_tx_sdx2_en(0);
+    (*hal.dev).conf.__bindgen_anon_1.set_tx_msb_right(1);
+    (*hal.dev).conf.__bindgen_anon_1.set_tx_mono(0);
+    (*hal.dev).conf.__bindgen_anon_1.set_tx_short_sync(0);
+    (*hal.dev).conf.__bindgen_anon_1.set_tx_msb_shift(0);
+    (*hal.dev).conf.__bindgen_anon_1.set_tx_right_first(1);
+    (*hal.dev).conf.__bindgen_anon_1.set_tx_slave_mod(0);
 
-        (*hal.dev).sample_rate_conf.val = 0;
-        (*hal.dev)
-            .sample_rate_conf
-            .__bindgen_anon_1
-            .set_tx_bits_mod(32);
-        (*hal.dev)
-            .sample_rate_conf
-            .__bindgen_anon_1
-            .set_tx_bck_div_num(1);
+    (*hal.dev).conf2.val = 0;
+    (*hal.dev).conf2.__bindgen_anon_1.set_lcd_en(1);
+    (*hal.dev).conf2.__bindgen_anon_1.set_lcd_tx_wrx2_en(0);
+    (*hal.dev).conf2.__bindgen_anon_1.set_lcd_tx_sdx2_en(0);
 
-        (*hal.dev).clkm_conf.val = 0;
-        (*hal.dev).clkm_conf.__bindgen_anon_1.set_clka_en(0);
+    (*hal.dev).sample_rate_conf.val = 0;
+    (*hal.dev)
+        .sample_rate_conf
+        .__bindgen_anon_1
+        .set_tx_bits_mod(32);
+    (*hal.dev)
+        .sample_rate_conf
+        .__bindgen_anon_1
+        .set_tx_bck_div_num(1);
 
-        (*hal.dev).fifo_conf.val = 0;
-        (*hal.dev)
-            .fifo_conf
-            .__bindgen_anon_1
-            .set_tx_fifo_mod_force_en(1);
-        (*hal.dev).fifo_conf.__bindgen_anon_1.set_tx_fifo_mod(3);
-        (*hal.dev).fifo_conf.__bindgen_anon_1.set_tx_data_num(32);
-        (*hal.dev).fifo_conf.__bindgen_anon_1.set_dscr_en(1);
+    (*hal.dev).clkm_conf.val = 0;
+    (*hal.dev).clkm_conf.__bindgen_anon_1.set_clka_en(0);
 
-        (*hal.dev).conf1.val = 0;
-        (*hal.dev).conf1.__bindgen_anon_1.set_tx_stop_en(0);
-        (*hal.dev).conf1.__bindgen_anon_1.set_tx_pcm_bypass(1);
+    (*hal.dev).fifo_conf.val = 0;
+    (*hal.dev)
+        .fifo_conf
+        .__bindgen_anon_1
+        .set_tx_fifo_mod_force_en(1);
+    (*hal.dev).fifo_conf.__bindgen_anon_1.set_tx_fifo_mod(3);
+    (*hal.dev).fifo_conf.__bindgen_anon_1.set_tx_data_num(32);
+    (*hal.dev).fifo_conf.__bindgen_anon_1.set_dscr_en(1);
 
-        (*hal.dev).conf_chan.val = 0;
-        (*hal.dev).conf_chan.__bindgen_anon_1.set_tx_chan_mod(1);
-        (*hal.dev).timing.val = 0;
-    */
+    (*hal.dev).conf1.val = 0;
+    (*hal.dev).conf1.__bindgen_anon_1.set_tx_stop_en(0);
+    (*hal.dev).conf1.__bindgen_anon_1.set_tx_pcm_bypass(1);
+
+    (*hal.dev).conf_chan.val = 0;
+    (*hal.dev).conf_chan.__bindgen_anon_1.set_tx_chan_mod(1);
+    (*hal.dev).timing.val = 0;
+
     // WS2812 spec copied from src/chipsets.h WS2812Controller800Khz in FastLED codebase
     let spec = LedSpec {
         t1_ns: 250,

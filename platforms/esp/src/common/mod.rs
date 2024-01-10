@@ -60,7 +60,7 @@ pub struct LedI2s {
 unsafe extern "C" fn i2s_interrupt_handler(arg: *mut ::core::ffi::c_void) {
     let dev = arg as *mut i2s_dev_t;
     (*dev).int_clr.val = (*dev).int_raw.val;
-    //panic!("GOPA FINALLY");
+    panic!("GOPA FINALLY");
 }
 
 impl LedI2s {
@@ -86,26 +86,20 @@ impl LedI2s {
         // Keep interrupts off for now
         //i2s_ll_enable_intr(hal.dev, I2S_LL_EVENT_TX_EOF, false);
 
-        //let clk_cfg = configure_clocks(&mut hal, &spec);
-        let clk_cfg = CalibrationResult {
-            divisor: 20,
-            t1_pulses: 1,
-            t2_pulses: 1,
-            t3_pulses: 2,
-        };
-        /*let pulses_per_bit = clk_cfg.t1_pulses + clk_cfg.t2_pulses + clk_cfg.t3_pulses;
+        let clk_cfg = configure_clocks(&mut hal, &spec);
+        let pulses_per_bit = clk_cfg.t1_pulses + clk_cfg.t2_pulses + clk_cfg.t3_pulses;
         let ones_for_one = clk_cfg.t1_pulses + clk_cfg.t2_pulses;
         let ones_for_zero = clk_cfg.t1_pulses;
-        let num_channels = lcd_periph_signals.buses[device as usize].data_sigs.len();*/
+        let num_channels = lcd_periph_signals.buses[device as usize].data_sigs.len();
         let pulses_per_bit = 4;
         let descriptors = Self::allocate_dma_descriptors(2, pulses_per_bit);
         // Various parts of the code assume that buffers holding the data can be cast into
         // array of u32 - see the usage of MAX_CHANNEL_32BIT_WORDS as an example.
-        //assert!(MAX_CHANNEL_BYTES >= 32 && MAX_CHANNEL_BYTES % 32 == 0);
+        assert!(MAX_CHANNEL_BYTES >= 32 && MAX_CHANNEL_BYTES % 32 == 0);
         // Just so that a new platform doesnt cause surprises
-        //assert!(num_channels <= MAX_CHANNEL_BYTES);
+        assert!(num_channels <= MAX_CHANNEL_BYTES);
 
-        /*let mut i2s = Self {
+        let mut i2s = Self {
             hal,
             device,
             intr_handle,
@@ -122,17 +116,17 @@ impl LedI2s {
         };
         i2s.reset();
 
-        println!("GOPA reset");
+        println!("GOPA1 reset");
 
         let data_pin = 4;
         let i2s_pin = lcd_periph_signals.buses[device as usize].data_sigs[0] as u32;
         gpio_ll_iomux_func_sel(GPIO_PIN_MUX_REG[data_pin as usize], PIN_FUNC_GPIO);
         gpio_set_direction(data_pin as i32, GPIO_MODE_DEF_OUTPUT);
-        esp_rom_gpio_connect_out_signal(data_pin, i2s_pin, false, false);*/
+        esp_rom_gpio_connect_out_signal(data_pin, i2s_pin, false, false);
 
-        println!("GOPA start {:#x}", hal.dev as u32);
+        println!("GOPA1 start {:#x}", hal.dev as u32);
 
-        Self::start(hal, descriptors[0].descriptor as u32, intr_handle);
+        i2s.start();
 
         println!("GOPA started");
 
@@ -146,10 +140,10 @@ impl LedI2s {
         let mut first: *mut lldesc_t = ptr::null_mut();
         let mut last: *mut lldesc_t = ptr::null_mut();
         let mut descriptors = vec![];
-        let (buffer, descriptor) =
-            Self::allocate_dma_descriptor(NUM_COLORS * MAX_CHANNEL_BYTES * pulses_per_bit);
-        descriptors.push(DmaDescriptor { buffer, descriptor });
-        return descriptors;
+        //let (buffer, descriptor) =
+        //    Self::allocate_dma_descriptor(NUM_COLORS * MAX_CHANNEL_BYTES * pulses_per_bit);
+        //descriptors.push(DmaDescriptor { buffer, descriptor });
+        //return descriptors;
 
         for _ in 0..ndescriptors {
             let (buffer, descriptor) =
@@ -200,22 +194,22 @@ impl LedI2s {
         (buffer, descriptor)
     }
 
-    unsafe fn start(hal: i2s_hal_context_t, descriptor: u32, intr_handle: intr_handle_t) {
+    unsafe fn start(&mut self) {
         //self.next_descriptor = 0;
         //self.reset();
         //self.platform.i2s_ll_burst_en(hal);
-        i2s_ll_set_out_link_addr(hal.dev, descriptor);
+        i2s_ll_set_out_link_addr(self.hal.dev, self.descriptors[0].descriptor as u32);
         //i2s_ll_set_out_link_addr(self.hal.dev, !0 as u32);
-        i2s_ll_start_out_link(hal.dev);
+        i2s_ll_start_out_link(self.hal.dev);
         //i2s_ll_clear_intr_status(self.hal.dev, I2S_LL_EVENT_TX_EOF);
         //self.platform.i2s_ll_set_out_dscr(self.hal);
 
-        esp_intr_enable(intr_handle);
-        (*hal.dev).int_ena.val = 0;
-        i2s_ll_tx_enable_intr(hal.dev);
+        esp_intr_enable(self.intr_handle);
+        (*self.hal.dev).int_ena.val = 0;
+        i2s_ll_tx_enable_intr(self.hal.dev);
 
         //start transmission
-        i2s_ll_tx_start(hal.dev);
+        i2s_ll_tx_start(self.hal.dev);
     }
 
     pub unsafe fn reset(&mut self) {
