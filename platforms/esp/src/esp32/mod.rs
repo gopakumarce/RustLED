@@ -5,7 +5,8 @@ use crate::common::{add_i2s_pin, start_mqtt, start_wifi, LedI2s, LedI2sPlatform}
 use esp_idf_hal::prelude::Peripherals;
 use esp_idf_svc::eventloop::EspSystemEventLoop;
 use esp_idf_sys::{
-    i2s_hal_context_t, i2s_hal_init, i2s_ll_rx_reset, i2s_ll_rx_reset_dma, i2s_ll_rx_reset_fifo,
+    gopa_init, i2sReset, i2sReset_DMA, i2sReset_FIFO, i2s_dev_t, i2s_hal_context_t, i2s_hal_init,
+    i2s_ll_rx_reset, i2s_ll_rx_reset_dma, i2s_ll_rx_reset_fifo, i2s_ll_set_raw_mclk_div,
     i2s_ll_tx_reset, i2s_ll_tx_reset_dma, i2s_ll_tx_reset_fifo, lcd_periph_signals,
     periph_module_enable, I2S_AHBM_FIFO_RST_S, I2S_AHBM_RST_S, I2S_IN_RST_S,
     I2S_OUTDSCR_BURST_EN_S, I2S_OUT_DATA_BURST_EN_S, I2S_OUT_RST_S, I2S_RX_FIFO_RESET_S,
@@ -35,6 +36,8 @@ impl LedI2sPlatform for PlatformESP32 {
     }
 
     unsafe fn i2s_reset(&self, hal: i2s_hal_context_t) {
+        //i2sReset(hal.dev);
+        //return;
         let reset = (1 << I2S_IN_RST_S)
             | (1 << I2S_OUT_RST_S)
             | (1 << I2S_AHBM_RST_S)
@@ -82,6 +85,9 @@ unsafe fn configure_i2s(device: u32) -> std::result::Result<(), &'static str> {
     let platform = Box::new(PlatformESP32 {});
     platform.i2s_reset(hal);
     i2s_reset(hal);
+    //i2sReset(hal.dev);
+    //i2sReset_DMA(hal.dev);
+    //i2sReset_FIFO(hal.dev);
 
     (*hal.dev).conf.__bindgen_anon_1.set_tx_msb_right(1);
     (*hal.dev).conf.__bindgen_anon_1.set_tx_mono(0);
@@ -108,14 +114,22 @@ unsafe fn configure_i2s(device: u32) -> std::result::Result<(), &'static str> {
     (*hal.dev).clkm_conf.val = 0;
     (*hal.dev).clkm_conf.__bindgen_anon_1.set_clka_en(0);
 
-    (*hal.dev).fifo_conf.val = 0;
-    (*hal.dev)
-        .fifo_conf
-        .__bindgen_anon_1
-        .set_tx_fifo_mod_force_en(1);
-    (*hal.dev).fifo_conf.__bindgen_anon_1.set_tx_fifo_mod(3);
-    (*hal.dev).fifo_conf.__bindgen_anon_1.set_tx_data_num(32);
-    (*hal.dev).fifo_conf.__bindgen_anon_1.set_dscr_en(1);
+    i2s_ll_set_raw_mclk_div(hal.dev, 10, 1, 0);
+    error!(
+        "GOPA clock {} {} {}",
+        (*hal.dev).clkm_conf.__bindgen_anon_1.clkm_div_num(),
+        (*hal.dev).clkm_conf.__bindgen_anon_1.clkm_div_a(),
+        (*hal.dev).clkm_conf.__bindgen_anon_1.clkm_div_b()
+    );
+
+    //(*hal.dev).fifo_conf.val = 0;
+    //(*hal.dev)
+    //.fifo_conf
+    //.__bindgen_anon_1
+    //.set_tx_fifo_mod_force_en(1);
+    //(*hal.dev).fifo_conf.__bindgen_anon_1.set_tx_fifo_mod(3);
+    //(*hal.dev).fifo_conf.__bindgen_anon_1.set_tx_data_num(32);
+    //(*hal.dev).fifo_conf.__bindgen_anon_1.set_dscr_en(1);
 
     (*hal.dev).conf1.val = 0;
     (*hal.dev).conf1.__bindgen_anon_1.set_tx_stop_en(0);
@@ -124,6 +138,8 @@ unsafe fn configure_i2s(device: u32) -> std::result::Result<(), &'static str> {
     (*hal.dev).conf_chan.val = 0;
     (*hal.dev).conf_chan.__bindgen_anon_1.set_tx_chan_mod(1);
     (*hal.dev).timing.val = 0;
+
+    gopa_init(hal.dev);
 
     // WS2812 spec copied from src/chipsets.h WS2812Controller800Khz in FastLED codebase
     let spec = LedSpec {
@@ -138,14 +154,14 @@ pub fn platform_init(pins: &[u32]) -> Result<()> {
     esp_idf_sys::link_patches();
     println!("Hello from Rust!");
     esp_idf_svc::log::EspLogger::initialize_default();
-    let peripherals = Peripherals::take().unwrap();
-    let sysloop = EspSystemEventLoop::take()?;
+    //let peripherals = Peripherals::take().unwrap();
+    /*let sysloop = EspSystemEventLoop::take()?;
     if let Err(error) = start_wifi(peripherals.modem, sysloop) {
         error!("Wifi Error {error}");
     }
     if let Err(error) = start_mqtt() {
         error!("Mqtt Error {error}")
-    }
+    }*/
     unsafe {
         if let Err(error) = configure_i2s(0) {
             error!("I2S config error {error}");

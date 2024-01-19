@@ -17,7 +17,7 @@ use esp_idf_sys::{
     xQueueSemaphoreTake, EspError, QueueHandle_t, TickType_t, UBaseType_t, _frxt_setup_switch,
     esp_clk_cpu_freq, esp_clk_tree_src_freq_precision_t_ESP_CLK_TREE_SRC_FREQ_PRECISION_EXACT,
     esp_clk_tree_src_get_freq_hz, esp_rom_gpio_connect_out_signal, gpio_ll_iomux_func_sel,
-    gpio_pull_mode_t_GPIO_FLOATING, gpio_set_direction, gpio_set_pull_mode,
+    gpio_pull_mode_t_GPIO_FLOATING, gpio_set_direction, gpio_set_pull_mode, i2s_dev_t,
     i2s_ll_set_raw_mclk_div, soc_periph_i2s_clk_src_t_I2S_CLK_SRC_DEFAULT, ESP_OK,
     GPIO_MODE_DEF_OUTPUT, GPIO_PIN_MUX_REG, MALLOC_CAP_DMA, PIN_FUNC_GPIO,
 };
@@ -245,9 +245,9 @@ impl LedI2s {
         self.cur_block += 1;
 
         for color in 0..NUM_COLORS {
-            for i in 0..self.num_channels {
+            for i in 0..self.num_pins() {
                 // Store the colors from pins in reverse order of pins
-                pixel_bytes[i] = self.color_bytes[0][color][d];
+                pixel_bytes[self.num_channels - 1 - i] = self.color_bytes[i][color][d];
             }
             transpose32(&pixel_bytes, &mut pixel_words);
 
@@ -375,7 +375,7 @@ pub unsafe fn add_i2s_pin(data_pin: u32) -> std::result::Result<u32, &'static st
         esp_rom_gpio_connect_out_signal(data_pin, *i2s_pin, false, false);
         error!(
             "GOPA i2s_pin {}, data_pin {} mux_reg {}",
-            *i2s_pin, data_pin, GPIO_PIN_MUX_REG[data_pin as usize]
+            *i2s_pin, data_pin as i32, GPIO_PIN_MUX_REG[data_pin as usize]
         );
     }
     i2s_pin
@@ -389,6 +389,14 @@ pub unsafe fn configure_clocks(hal: &mut i2s_hal_context_t, spec: &LedSpec) -> C
         &mut base_clock,
     );
     let base_clock = base_clock as usize;
+    error!(
+        "GOPA t1 {}, t2 {}, t3{}, clock {} base {}\n",
+        spec.t1_ns,
+        spec.t2_ns,
+        spec.t3_ns,
+        esp_clk_cpu_freq(),
+        base_clock
+    );
     let result = scale_clocks(spec, esp_clk_cpu_freq() as usize, base_clock);
     let mclk = base_clock / result.divisor;
     info!(
@@ -402,12 +410,12 @@ pub unsafe fn configure_clocks(hal: &mut i2s_hal_context_t, spec: &LedSpec) -> C
         result.t2_ticks,
         result.t3_ticks
     );
-    i2s_ll_set_raw_mclk_div(
+    /*i2s_ll_set_raw_mclk_div(
         hal.dev,
         result.divisor as u32,
         result.denominator as u32,
         result.numerator as u32,
-    );
+    );*/
     result
 }
 
@@ -457,17 +465,18 @@ pub unsafe fn show_pixels(bytes: Vec<Vec<Vec<u8>>>) -> (bool, Vec<Vec<Vec<u8>>>)
     take_semaphore(SEMAPHORE);
     error!("GOPA GOT SEMA");
 
-    let ret = critical_section::with(|cs| {
+    let mut ret = false;
+    let mut buf = vec![];
+    critical_section::with(|cs| {
         LEDI2S.borrow(cs).borrow_mut().as_mut().map(|i2s| {
             i2s.stop();
-            let buf = std::mem::replace(&mut i2s.color_bytes, vec![]);
-            (true, buf)
+            //buf = std::mem::replace(&mut i2s.color_bytes, vec![]);
+            ret = true;
         })
-    })
-    .unwrap();
+    });
 
-    give_semaphore(SEMAPHORE);
-    ret
+    //give_semaphore(SEMAPHORE);
+    (ret, buf)
 }
 
 // TODO: HACK ALERT: freertos code defines xSemaphoreCreateBinary as a #define.

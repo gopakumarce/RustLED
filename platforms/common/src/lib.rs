@@ -1,5 +1,5 @@
-const NANOSECS: usize = 1_000_000_000;
 const MICROSECS: usize = 1_000_000;
+const NANOSECS: usize = MICROSECS * 1_000;
 const I2S_MAX_PULSE_PER_BIT: usize = 20;
 
 // For example WS2811 specs will be
@@ -55,13 +55,14 @@ fn pgcd(mut smallest: usize, precision: usize, a: usize, b: usize, c: usize) -> 
 // sound a very convincing math ?
 pub fn scale_clocks(spec: &LedSpec, cpu_clock: usize, i2s_clock: usize) -> ClockDivisors {
     // Convert nano seconds into CPU ticks. Note that are clocks are in Hertz
-    let t1 = (spec.t1_ns * (cpu_clock / MICROSECS) + 999) / 1000;
-    let t2 = (spec.t2_ns * (cpu_clock / MICROSECS) + 999) / 1000;
-    let t3 = (spec.t3_ns * (cpu_clock / MICROSECS) + 999) / 1000;
+    let cpu_mhz = cpu_clock / MICROSECS;
+    let t1 = (spec.t1_ns * cpu_mhz + 999) / 1000;
+    let t2 = (spec.t2_ns * cpu_mhz + 999) / 1000;
+    let t3 = (spec.t3_ns * cpu_mhz + 999) / 1000;
 
-    let t1_ns = (t1 * NANOSECS) / cpu_clock;
-    let t2_ns = (t2 * NANOSECS) / cpu_clock;
-    let t3_ns = (t3 * NANOSECS) / cpu_clock;
+    let t1_ns = (t1 * 1000) / cpu_mhz;
+    let t2_ns = (t2 * 1000) / cpu_mhz;
+    let t3_ns = (t3 * 100) / cpu_mhz;
 
     let smallest = std::cmp::min(t3, std::cmp::min(t1, t2));
     let mut precision = 0;
@@ -80,8 +81,9 @@ pub fn scale_clocks(spec: &LedSpec, cpu_clock: usize, i2s_clock: usize) -> Clock
         precision += 1;
     }
 
-    let pulses_per_bit = t1 / pgc + t2 / pgc + t3 / pgc;
-    let freq = ((NANOSECS * pulses_per_bit) as f32) / ((t1_ns + t2_ns + t3_ns) as f32);
+    let pulses_per_bit = (1 / pgc + t2 / pgc + t3 / pgc) as f32;
+    let nsecs = (t1_ns + t2_ns + t3_ns) as f32;
+    let freq = (pulses_per_bit / nsecs) * NANOSECS as f32;
 
     let precision = (1 as f32) / (63 as f32);
     let prec_by2: f32 = precision / (2 as f32);
